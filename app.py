@@ -2,6 +2,7 @@ import json
 import torch
 import pandas as pd
 import gradio as gr
+import matplotlib.pyplot as plt
 
 from transformers import (
     AutoTokenizer,
@@ -99,20 +100,38 @@ def analyze_csv(file):
 
         results.append(
             {
-                "row_index": idx,
-                "assigned_priority":
-                    df.iloc[idx]["priority_level"],
-                "mismatch_probability":
-                    round(
-                        float(mismatch_prob[idx]),
-                        4
-                    ),
-                "confidence":
-                    confidence_level
+                "ticket_id": idx,
+                "assigned_priority": df.iloc[idx]["priority_level"],
+                "binary_judgment": "Mismatch Detected",
+                "confidence": confidence_level,
+                "confidence_score": round(float(mismatch_prob[idx]), 4),
+                "mismatch_type": "Potential Under-Prioritization",
+                "evidence": (
+                    f"Channel: {df.iloc[idx]['ticket_channel']}"
+                ),
+                "analysis": (
+                    f"Assigned priority "
+                    f"{df.iloc[idx]['priority_level']} "
+                    f"appears inconsistent with "
+                    f"the inferred ticket severity."
+                )
             }
         )
 
-    output_df = pd.DataFrame(results)
+    total_tickets = len(df)
+    flagged_tickets = len(output_df)
+
+    flag_rate = (
+        flagged_tickets / total_tickets * 100
+        if total_tickets > 0
+        else 0
+    )
+
+    dashboard_summary = f"""
+    Total Tickets: {total_tickets}
+    Flagged Tickets: {flagged_tickets}
+    Flag Rate: {flag_rate:.2f}%
+    """
 
     summary = (
         f"Processed {len(df)} tickets.\n"
@@ -120,7 +139,29 @@ def analyze_csv(file):
         f"potential priority mismatches."
     )
 
-    return output_df, summary
+    fig, ax = plt.subplots()
+
+    ax.pie(
+        [
+            total_tickets - flagged_tickets,
+            flagged_tickets
+        ],
+        labels=[
+            "Consistent",
+            "Flagged"
+        ],
+        autopct="%1.1f%%"
+    )
+
+    ax.set_title(
+        "Priority Audit Distribution"
+    )
+
+    return (
+        output_df,
+        dashboard_summary,
+        fig
+    )
 
 
 demo = gr.Interface(
