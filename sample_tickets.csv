@@ -1,0 +1,11 @@
+priority_level,ticket_channel,ticket_subject,ticket_description
+Low,Email,Server Outage,Production servers are down and customers cannot access the platform
+Low,Chat,Security Breach,Sensitive customer information may have been exposed due to unauthorized access
+Medium,Email,Refund Request,Customer requesting refund for a cancelled order
+High,Phone,Login Issue,Users are unable to login after the latest update
+Medium,Chat,Delayed Delivery,Order has not arrived and customer is requesting an update
+Low,Email,Database Crash,Primary database crashed causing service disruption across regions
+High,Phone,Payment Failure,Multiple customers reporting failed payment transactions
+Medium,Email,Account Locked,Customer account locked after several failed login attempts
+Low,Chat,Fraud Alert,Suspicious transactions detected on multiple customer accounts
+Medium,Phone,Feature Request,Customer would like a new reporting feature added

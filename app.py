@@ -50,7 +50,8 @@ def analyze_csv(file):
     if missing:
         return (
             pd.DataFrame(),
-            f"Missing columns: {missing}"
+            f"Missing columns: {missing}",
+            None
         )
 
     texts = df.apply(
@@ -105,7 +106,11 @@ def analyze_csv(file):
                 "binary_judgment": "Mismatch Detected",
                 "confidence": confidence_level,
                 "confidence_score": round(float(mismatch_prob[idx]), 4),
-                "mismatch_type": "Potential Under-Prioritization",
+                "mismatch_type": (
+                    "Potential Under-Prioritization"
+                    if df.iloc[idx]["priority_level"] in ["Low", "Medium"]
+                    else "Potential Over-Prioritization"
+                ),
                 "evidence": (
                     f"Channel: {df.iloc[idx]['ticket_channel']}"
                 ),
@@ -118,7 +123,9 @@ def analyze_csv(file):
             }
         )
 
+    output_df = pd.DataFrame(results)
     total_tickets = len(df)
+    
     flagged_tickets = len(output_df)
 
     flag_rate = (
@@ -127,17 +134,19 @@ def analyze_csv(file):
         else 0
     )
 
+    avg_confidence = (
+        output_df["confidence_score"].mean()
+        if flagged_tickets > 0
+        else 0
+    )
+
     dashboard_summary = f"""
     Total Tickets: {total_tickets}
     Flagged Tickets: {flagged_tickets}
     Flag Rate: {flag_rate:.2f}%
+    Average Confidence: {avg_confidence:.3f}
     """
 
-    summary = (
-        f"Processed {len(df)} tickets.\n"
-        f"Detected {len(output_df)} "
-        f"potential priority mismatches."
-    )
 
     fig, ax = plt.subplots()
 
@@ -156,6 +165,7 @@ def analyze_csv(file):
     ax.set_title(
         "Priority Audit Distribution"
     )
+    plt.tight_layout()
 
     return (
         output_df,
@@ -171,18 +181,21 @@ demo = gr.Interface(
     ),
     outputs=[
         gr.Dataframe(
-            label="Detected Mismatches"
+            label="Evidence Dossiers"
         ),
         gr.Textbox(
-            label="Summary"
+            label="Dashboard Summary"
+        ),
+        gr.Plot(
+            label="Flag Distribution"
         )
     ],
-    title="Customer Support Ticket Auditor",
+    title="Priority Audit AI",
     description=(
-        "Upload a CSV of support tickets. "
-        "The model identifies tickets whose "
-        "assigned priority may not match "
-        "their inferred severity."
+        "Detects hidden priority mismatches "
+        "in customer support tickets using "
+        "signal-fusion based pseudo labeling "
+        "and DistilBERT classification."
     )
 )
 
