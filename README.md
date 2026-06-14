@@ -1,14 +1,16 @@
 ---
 title: Priority Audit AI
-emoji: 📉
+emoji: 📋
 colorFrom: blue
-colorTo: red
+colorTo: indigo
 sdk: gradio
-sdk_version: 6.18.0
-python_version: '3.13'
+sdk_version: 5.34.2
 app_file: app.py
 pinned: false
-license: mit
 ---
 
-Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
+# Priority Audit AI
+
+AI-powered auditing system for customer support tickets.
+
+The model identifies potential mismatches between assigned ticket priority and inferred issue severity using DistilBERT.
